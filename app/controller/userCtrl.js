@@ -142,7 +142,7 @@ var createAdmin = (req, res)=>{
 
       let Password ='admin@123';
       let Email = req.body.email;
-      let confirmpassword = { confirmpassword : 'admin@123' };
+      let confirmpassword = 'admin@123';
       var token;
 
        console.log(req.body) 
@@ -207,6 +207,47 @@ var addNewRole = (req, res)=>{
       }
   );
 }
+
+var addCountryBySuperAdmin = (req, res)=>{
+  isSuperAdmin(userId,(data)=>{
+    if(data){
+      let obj = { country : req.body.country, capital : req.body.capital ? req.body.capital : '' }
+      Country.create(obj,(err,data)=>{
+        return res.send({status:200, message:"Country added successfully!"});
+      })
+    }else{
+      return res.send({status:200, message:"Sorry you can't add country"});
+    }
+  })  
+}
+
+var getCountyList = (req, res)=>{
+  isSuperAdmin(userId,(data)=>{
+    if(data){
+      Country.find({},(err,data)=>{
+        return res.send({status:200, message:"Country list get successfully!",data : data});
+      })
+    }else{
+      return res.send({status:200, message:"Sorry you can't get country"});
+    }
+  })  
+}
+
+function isSuperAdmin(userId,callback){
+  User.findByIdAndUpdate(userId,function(err, doc) {
+          if(err){ console.log(err);
+          }else{
+          if(doc && doc.accountType=='Super Admin'){
+
+            callback(true);
+          }else{
+            callback(false);
+          }
+          console.log('success');
+          }
+      }
+  );
+}
 // Export function for access interact with DB
   exports.registration = registration;
   exports.login  = login;
@@ -215,3 +256,6 @@ var addNewRole = (req, res)=>{
 
   exports.createAdmin = createAdmin;
   exports.addNewRole = addNewRole;
+
+  exports.addCountryBySuperAdmin = addCountryBySuperAdmin;
+  exports.getCountyList = getCountyList;

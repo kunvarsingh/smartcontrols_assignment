@@ -15,4 +15,7 @@ router.post('/updateProfile',usered.updateProfile);
 
 router.post('/createAdmin', usered.createAdmin);
 router.post('/addNewRole', usered.addNewRole);
+
+router.post('/addCountryBySuperAdmin', usered.addCountryBySuperAdmin);
+router.get('/getCountryList', usered.getCountyList);
 module.exports = router;
