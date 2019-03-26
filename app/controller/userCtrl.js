@@ -233,6 +233,33 @@ var getCountyList = (req, res)=>{
   })  
 }
 
+var editCountry = (req, res)=>{
+  Country.findByIdAndUpdate(req.body.countryId,
+    {country : req.body.country},
+      function(err, doc) {
+          if(err){
+          console.log(err);
+          }else{
+          //do stuff
+          console.log('success');
+          }
+      }
+  );
+}
+
+var deleteCountry = (req, res)=>{
+  Country.remove(req.body.countryId,
+      function(err, doc) {
+          if(err){
+          console.log(err);
+          }else{
+          //do stuff
+          console.log('success');
+          }
+      }
+  );
+}
+
 function isSuperAdmin(userId,callback){
   User.findByIdAndUpdate(userId,function(err, doc) {
           if(err){ console.log(err);
@@ -259,3 +286,6 @@ function isSuperAdmin(userId,callback){
 
   exports.addCountryBySuperAdmin = addCountryBySuperAdmin;
   exports.getCountyList = getCountyList;
+
+  exports.editCountry = editCountry;
+  exports.deleteCountry = deleteCountry;
