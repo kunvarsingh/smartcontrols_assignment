@@ -21,4 +21,7 @@ router.get('/getCountryList', usered.getCountyList);
 
 router.post('/editCountry', usered.editCountry);
 router.post('/deleteCountry', usered.deleteCountry);
+
+router.post('/deleteUser', usered.deleteUser);
+router.get('/getallUsers', usered.getallUsers);
 module.exports = router;

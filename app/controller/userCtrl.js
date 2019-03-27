@@ -260,6 +260,33 @@ var deleteCountry = (req, res)=>{
   );
 }
 
+var deleteUser = (req, res)=>{
+  User.remove(req.body.userId,
+      function(err, doc) {
+          if(err){
+          console.log(err);
+          }else{
+          //do stuff
+          console.log('success');
+          }
+      }
+  );
+}
+
+var getallUsers = (req, res)=>{
+  User.find({},{},
+      function(err, doc) {
+          if(err){
+          console.log(err);
+          }else{
+          //do stuff
+          console.log('success');
+          }
+      }
+  );
+}
+
+
 function isSuperAdmin(userId,callback){
   User.findByIdAndUpdate(userId,function(err, doc) {
           if(err){ console.log(err);
@@ -289,3 +316,6 @@ function isSuperAdmin(userId,callback){
 
   exports.editCountry = editCountry;
   exports.deleteCountry = deleteCountry;
+
+  exports.deleteUser = deleteUser;
+  exports.getallUsers =getallUsers;
