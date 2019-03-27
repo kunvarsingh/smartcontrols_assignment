@@ -11,6 +11,7 @@ var path = require('path');
 
 // Modals and custome file import
 var User = require('../models/userModel.js');
+var Country = require('../models/Country.js');
 var CONST = require('../../config/constant');
 
 // ----------------------------Registeration-------------------------------
@@ -81,15 +82,16 @@ var registration = (req, res)=>{
           };
 
           if(reqObj.Email && reqObj.Password){
-                      User.findOne({Email :req.body.email},{},function(err ,data){
+                      User.findOne({Email :req.body.email},{verifyEmail :0},function(err ,data){
                         if(err) return res.json({message : "Err, unable to get the data",err,status : 400})
 
                         if(data) {
-                                bcrypt.compare(req.body.password,data.Password,function(err  ,success){
-                                if(err) return res.json({message : "unable to campare the password",status : 400})
+                                bcrypt.compare(reqObj.Password,data.Password,function(err  ,success){
+                                if(err) return res.json({message : "unable to campare the password",status : 400,error:err})
                                 
                                 else if(success){
                                    var token = jwt.sign({id:data._id},'secret',{ expiresIn: '1h' });
+                                   data.Password='';
                                    return res.json({status :200, message : "User login successfully",auth : true,token : token , data : data })
 
                                    var userid =  function(req, res) {
@@ -194,43 +196,50 @@ var createAdmin = (req, res)=>{
 }
 
 var addNewRole = (req, res)=>{
+  let userId = req.body.userId;
+  let roles = req.body.roles;
+  if(userId && roles){
   User.findByIdAndUpdate(req.body.userId,
     {$push: {roles: req.body.roles}},
     {safe: true, upsert: true},
       function(err, doc) {
           if(err){
-          console.log(err);
+          return res.send({status:400, message:"Error occured to add new role!"});
           }else{
           //do stuff
-          console.log('success');
+          return res.send({status:200, message:"New role added successfully!"});
           }
       }
   );
+}else{
+  return res.send({status:400, message:"Please send userId and roles!"});
+}
 }
 
 var addCountryBySuperAdmin = (req, res)=>{
-  isSuperAdmin(userId,(data)=>{
-    if(data){
-      let obj = { country : req.body.country, capital : req.body.capital ? req.body.capital : '' }
+  let userId = req.body.userId;
+  let country = req.body.country;
+  let capital = req.body.capital;
+  if(userId && country || capital){
+      let obj = { country : country, capital :  capital? capital : '', addedBy : userId }
       Country.create(obj,(err,data)=>{
         return res.send({status:200, message:"Country added successfully!"});
-      })
-    }else{
-      return res.send({status:200, message:"Sorry you can't add country"});
-    }
-  })  
+      }); 
+}else{
+  return res.send({status:400, message:"Please send userId!"});
+}
 }
 
 var getCountyList = (req, res)=>{
-  isSuperAdmin(userId,(data)=>{
-    if(data){
-      Country.find({},(err,data)=>{
-        return res.send({status:200, message:"Country list get successfully!",data : data});
-      })
+   let userId = req.body.userId;
+    if(userId){
+      console.log('i am inside getCountyList ')
+          Country.find({},{}).populate('addedBy',{UserName:1}).exec((err,data)=>{
+            return res.send({status:200, message:"Country list get successfully!",data : data});
+          })
     }else{
-      return res.send({status:200, message:"Sorry you can't get country"});
-    }
-  })  
+    return res.send({status:400, message:"Please send userId!"});
+  }  
 }
 
 var editCountry = (req, res)=>{
@@ -248,39 +257,49 @@ var editCountry = (req, res)=>{
 }
 
 var deleteCountry = (req, res)=>{
-  Country.remove(req.body.countryId,
+  let countryId = req.body.countryId;
+  if(countryId){
+  Country.remove({_id:req.body.countryId},
       function(err, doc) {
           if(err){
-          console.log(err);
+          return res.send({status:400, message:"Error to delete country!",error:err});
           }else{
           //do stuff
-          console.log('success');
+          return res.send({status:200, message:"deleted country!"});
           }
       }
   );
+   }else{
+  return res.send({status:400, message:"Please send countryId!"});
+}  
 }
 
 var deleteUser = (req, res)=>{
-  User.remove(req.body.userId,
+   let userId = req.body.userId;
+  if(userId){
+  User.remove({_id:userId},
       function(err, doc) {
           if(err){
-          console.log(err);
+          return res.send({status:400, message:"Error to delete users!",error:err});
           }else{
           //do stuff
-          console.log('success');
+          return res.send({status:200, message:"deleted user!"});
           }
       }
   );
+   }else{
+  return res.send({status:400, message:"Please send userId!"});
+}  
 }
 
 var getallUsers = (req, res)=>{
-  User.find({},{},
+  User.find( { $or: [{accountType : 'Admin'},{accountType : 'Others'}]},{Password :0, verifyEmail :0},
       function(err, doc) {
           if(err){
-          console.log(err);
+          return res.send({status:400, message:"Error to fetch users!"});
           }else{
           //do stuff
-          console.log('success');
+          return res.send({status:200, message:"All users!",data : doc});
           }
       }
   );
@@ -288,16 +307,17 @@ var getallUsers = (req, res)=>{
 
 
 function isSuperAdmin(userId,callback){
-  User.findByIdAndUpdate(userId,function(err, doc) {
+  console.log('i am inside isSuperAdmin ')
+  User.findByIdAndUpdate({_id:userId},function(err, doc) {
+     console.log('not super admin',err,doc);
           if(err){ console.log(err);
           }else{
           if(doc && doc.accountType=='Super Admin'){
-
             callback(true);
           }else{
+
             callback(false);
           }
-          console.log('success');
           }
       }
   );

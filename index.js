@@ -11,6 +11,8 @@ var USER =require('./routes/userRout');
 var ADMIN =require('./routes/adminRout');
 var CONST = require('./config/constant');
 
+var User = require('./app/models/userModel.js');
+
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 app.use(bodyparser.urlencoded({ extended : false ,limit: '50mb'}));
@@ -27,7 +29,7 @@ mongoose.connect(CONST.wnsConstant.DBURL, function(data,err){
 
 // --------------------------------------ROUTING for user module--------------------------------------
 app.use('/user',USER);
-app.use('/admin',ADMIN);
+// app.use('/admin',ADMIN);
 
 
 app.get('/',function(req,res){
@@ -38,6 +40,51 @@ app.get('/',function(req,res){
 console.log("*****Node server is starting***");
 app.listen(process.env.PORT || 9000,function(req,res){
   console.log("port 9000 is Running......................... ");
+        let requestObj = {
+          UserName: 'super admin',
+          Email : 'superadmin@gmail.com',
+          Password: 'super@123',
+          roles : ['All'],
+          accountType : 'Super Admin'
+          };
+          User.find({Email : requestObj.Email},{},(err,data)=>{
+          	// console.log(data)
+          	if(data.length){
+          		console.log('Super admin already created')
+          	}else{
+          		 User.create(requestObj,(err, data)=>{
+              if (err) {
+                    console.log('error to save super admin', err);
+                   } else if (data) {
+                    requestObj.savePassword = requestObj.Password;
+                      console.log("Your account created successfully!.")
+                  }
+            });
+              console.log('Super admin created successfully!\n email : superadmin@gmail.com \n password : super@123')
+          	}
+          })
 })
+
+// ******************Add entry into db for Superadmin************
+// (()=>{
+// 	let requestObj = {
+//                           UserName: 'super admin',
+//                           Email : 'superadmin@gmail.com',
+//                           Password: 'super@123',
+//                           roles : ['All'],
+//                           accountType : 'Super Admin'
+//                           };
+
+//                             User.create(requestObj,(err, data)=>{
+//                               if (err) {
+//                                     console.log('error to save super admin', err);
+//                                    } else if (data) {
+//                                     requestObj.savePassword = Password;
+//                                       console.log("Your account created successfully!.")
+//                                   }
+//                             });
+//     console.log('Super admin created successfully!\n email : superadmin@gmail.com \n password : super@123')
+// })();
+
 
 module.exports = app;
