@@ -31,7 +31,6 @@ mongoose.connect(CONST.wnsConstant.DBURL, function(data,err){
 app.use('/user',USER);
 // app.use('/admin',ADMIN);
 
-
 app.get('/',function(req,res){
   res.send({message :"Welcome World Teach"});
 });
@@ -40,29 +39,36 @@ app.get('/',function(req,res){
 console.log("*****Node server is starting***");
 app.listen(process.env.PORT || 9000,function(req,res){
   console.log("port 9000 is Running......................... ");
-        let requestObj = {
-          UserName: 'super admin',
-          Email : 'superadmin@gmail.com',
-          Password: 'super@123',
-          roles : ['All'],
-          accountType : 'Super Admin'
-          };
-          User.find({Email : requestObj.Email},{},(err,data)=>{
-          	// console.log(data)
-          	if(data.length){
-          		console.log('Super admin already created')
-          	}else{
-          		 User.create(requestObj,(err, data)=>{
-              if (err) {
-                    console.log('error to save super admin', err);
-                   } else if (data) {
-                    requestObj.savePassword = requestObj.Password;
-                      console.log("Your account created successfully!.")
-                  }
-            });
-              console.log('Super admin created successfully!\n email : superadmin@gmail.com \n password : super@123')
-          	}
-          })
+   bcrypt.hash('super@123', 10, (err, hash)=> {
+                      if (err) {
+                          return res.json({ message: "unable to bcrypt the password",status: 200 })
+                        } 
+                        else if (hash){
+                          let requestObj = {
+                            UserName: 'super admin',
+                            Email : 'superadmin@gmail.com',
+                            Password: hash,
+                            roles : ['All'],
+                            accountType : 'Super Admin'
+                            };
+                            User.find({Email : requestObj.Email},{},(err,data)=>{
+                            	// console.log(data)
+                            	if(data.length){
+                            		console.log('Super admin already created')
+                            	}else{
+                            		 User.create(requestObj,(err, data)=>{
+                                if (err) {
+                                      console.log('error to save super admin', err);
+                                     } else if (data) {
+                                      requestObj.savePassword = requestObj.Password;
+                                        console.log("Your account created successfully!.")
+                                    }
+                              });
+                                console.log('Super admin created successfully!\n email : superadmin@gmail.com \n password : super@123')
+                            	}
+                            })
+                          }
+      })
 })
 
 // ******************Add entry into db for Superadmin************

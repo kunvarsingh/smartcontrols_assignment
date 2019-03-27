@@ -305,6 +305,25 @@ var getallUsers = (req, res)=>{
   );
 }
 
+var getuserById = (req, res)=>{
+   let userId = req.body.userId;
+  if(userId){
+  User.find( {_id: userId},{Password :0, verifyEmail :0},
+      function(err, doc) {
+          if(err){
+          return res.send({status:400, message:"Error to fetch users!"});
+          }else{
+          //do stuff
+          return res.send({status:200, message:"All users!",data : doc});
+          }
+      }
+  );
+}
+ else{
+  return res.send({status:400, message:"Please send userId!"});
+}  
+}
+
 
 function isSuperAdmin(userId,callback){
   console.log('i am inside isSuperAdmin ')
@@ -339,3 +358,4 @@ function isSuperAdmin(userId,callback){
 
   exports.deleteUser = deleteUser;
   exports.getallUsers =getallUsers;
+  exports.getuserById = getuserById;
