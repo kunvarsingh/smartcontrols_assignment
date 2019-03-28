@@ -23,6 +23,8 @@ router.post('/editCountry', usered.editCountry);
 router.post('/deleteCountry', usered.deleteCountry);
 
 router.post('/deleteUser', usered.deleteUser);
-router.get('/getallUsers', usered.getallUsers);
+router.post('/getallUsers', usered.getallUsers);
 router.post('/getuserById', usered.getuserById);
+
+router.post('/updateCapital', usered.updateCapital);
 module.exports = router;

@@ -169,7 +169,7 @@ var createAdmin = (req, res)=>{
                                   Email : Email,
                                   Password: hash,
                                   roles : req.body.roles,
-                                  accountType : 'Admin'
+                                  accountType : req.body.accountType
                                   };
 
                                   if(requestObj.UserName && requestObj.Email){
@@ -218,13 +218,21 @@ var addNewRole = (req, res)=>{
 
 var addCountryBySuperAdmin = (req, res)=>{
   let userId = req.body.userId;
-  let country = req.body.country;
-  let capital = req.body.capital;
+  let country = req.body.countryName;
+  let capital = req.body.capitalName;
   if(userId && country || capital){
-      let obj = { country : country, capital :  capital? capital : '', addedBy : userId }
+      let obj = { country : country, capital :  capital? capital : '', addedBy : userId };
+    Country.find({country:country},{},(err,data1)=>{
+      // console.log(data1)
+      if(data1.length){
+        return res.send({status:400, message:"Country already exist!"});
+      }else{
       Country.create(obj,(err,data)=>{
         return res.send({status:200, message:"Country added successfully!"});
       }); 
+    }
+    })
+
 }else{
   return res.send({status:400, message:"Please send userId!"});
 }
@@ -254,6 +262,26 @@ var editCountry = (req, res)=>{
           }
       }
   );
+}
+
+var updateCapital =  (req, res)=>{
+   let countryId = req.body.countryId;
+   let capitalName = req.body.capitalName;
+   if(countryId){
+  Country.findByIdAndUpdate(countryId,
+    {capital : capitalName},
+      function(err, doc) {
+          if(err){
+          return res.send({status:400, message:"Error occured to update capital!"});
+          }else{
+          //do stuff
+          return res.send({status:200, message:"Capital update successfully!"});
+          }
+      }
+  );
+  }else{
+    return res.send({status:400, message:"Please send countryId!"});
+  }  
 }
 
 var deleteCountry = (req, res)=>{
@@ -293,16 +321,28 @@ var deleteUser = (req, res)=>{
 }
 
 var getallUsers = (req, res)=>{
-  User.find( { $or: [{accountType : 'Admin'},{accountType : 'Others'}]},{Password :0, verifyEmail :0},
-      function(err, doc) {
-          if(err){
-          return res.send({status:400, message:"Error to fetch users!"});
-          }else{
-          //do stuff
-          return res.send({status:200, message:"All users!",data : doc});
-          }
-      }
-  );
+    let userId = req.body.userId;
+    let type = '';
+  if(userId){
+    User.find({_id:userId},{Password :0, verifyEmail :0},function(err, doc1) {
+      console.log(doc1.length,doc1[0].accountType,doc1.length && doc1[0].accountType=='Super Admin')
+      if(doc1.length && doc1[0].accountType=='Super Admin') type ='Admin';
+      else type = 'Others';
+      User.find({accountType : type},{Password :0, verifyEmail :0},
+        // User.find( { $or: [{accountType : 'Admin'},{accountType : 'Others'}]},{Password :0, verifyEmail :0},
+            function(err, doc) {
+                if(err){
+                return res.send({status:400, message:"Error to fetch users!"});
+                }else{
+                //do stuff
+                return res.send({status:200, message:"All users!",data : doc});
+                }
+            });
+
+});
+   }else{
+  return res.send({status:400, message:"Please send userId!"});
+}  
 }
 
 var getuserById = (req, res)=>{
@@ -359,3 +399,5 @@ function isSuperAdmin(userId,callback){
   exports.deleteUser = deleteUser;
   exports.getallUsers =getallUsers;
   exports.getuserById = getuserById;
+
+  exports.updateCapital = updateCapital;

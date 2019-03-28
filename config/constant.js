@@ -1,8 +1,7 @@
 
 const wnsConstant = {
-    // DBURL : 'mongodb://kunvar:kunvar123@ds115664.mlab.com:15664/wns_assignment',
+    // DBURL : 'mongodb://kunvar:kunvar1@ds227146.mlab.com:27146/smartcontols',
     DBURL : 'mongodb://localhost:27017/smartControls',
-    manupulationValue : 10
 };
 
 var obj = {

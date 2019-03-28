@@ -8,7 +8,6 @@ var cors = require('cors');
 
 // import routing files----------------------
 var USER =require('./routes/userRout');
-var ADMIN =require('./routes/adminRout');
 var CONST = require('./config/constant');
 
 var User = require('./app/models/userModel.js');
@@ -29,7 +28,6 @@ mongoose.connect(CONST.wnsConstant.DBURL, function(data,err){
 
 // --------------------------------------ROUTING for user module--------------------------------------
 app.use('/user',USER);
-// app.use('/admin',ADMIN);
 
 app.get('/',function(req,res){
   res.send({message :"Welcome World Teach"});
@@ -70,27 +68,4 @@ app.listen(process.env.PORT || 9000,function(req,res){
                           }
       })
 })
-
-// ******************Add entry into db for Superadmin************
-// (()=>{
-// 	let requestObj = {
-//                           UserName: 'super admin',
-//                           Email : 'superadmin@gmail.com',
-//                           Password: 'super@123',
-//                           roles : ['All'],
-//                           accountType : 'Super Admin'
-//                           };
-
-//                             User.create(requestObj,(err, data)=>{
-//                               if (err) {
-//                                     console.log('error to save super admin', err);
-//                                    } else if (data) {
-//                                     requestObj.savePassword = Password;
-//                                       console.log("Your account created successfully!.")
-//                                   }
-//                             });
-//     console.log('Super admin created successfully!\n email : superadmin@gmail.com \n password : super@123')
-// })();
-
-
 module.exports = app;
